@@ -38,7 +38,7 @@ jobs:
         run: npm ci
 
       - name: Run Tests
-        run: npm test -- --watchAll=false
+        run: npm run test -- --run
 
       - name: Compile Frontend Assets
         run: npm run build
