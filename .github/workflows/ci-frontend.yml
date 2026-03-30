@@ -1,0 +1,122 @@
+# File: .github/workflows/ci-frontend.yml
+name: Frontend CI Pipeline (Feature to Develop PR)
+
+on:
+  pull_request:
+    branches:
+      - develop
+    # Triggers evaluated on code updates and PR closures
+    types: [opened, synchronize, reopened, closed]
+
+# 2026 Modernization: Concurrency control to terminate redundant in-progress runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Continuous Integration (Test & Build)
+    # Exclude execution if the PR is merely being closed to save resources
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Upgraded to v6: Isolated credential persistence in secure $RUNNER_TEMP
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # Upgraded to v6: Automatic caching detection and Node 24 (Active LTS)
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      # 2026 Best Practice: Deterministic installation utilizing the lockfile
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test -- --watchAll=false
+
+      - name: Compile Frontend Assets
+        run: npm run build
+
+  deploy_preview:
+    name: Vercel Preview Deployment
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.event.action != 'closed'
+
+    # Environment variables securely mapped from repository secrets
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Configuration
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Locally (GitHub Actions Runner Compute)
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      # 2026 Best Practice: Deploying with custom metadata for robust API teardown
+      # FIX 3: Corrected markdown link syntax from "Link:(url)" to "[Link](url)"
+      - name: Deploy Prebuilt Assets to Vercel
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --meta githubPrId=${{ github.event.pull_request.number }})
+          echo "Vercel Preview URL: $DEPLOYMENT_URL"
+
+          # Publish URL directly to the GitHub Step Summary UI
+          echo "### Deployment Successful 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "[Preview Link]($DEPLOYMENT_URL)" >> $GITHUB_STEP_SUMMARY
+
+  teardown_preview:
+    name: Environment Cleanup
+    runs-on: ubuntu-latest
+    # Removed deadlock dependency: This runs completely independently on PR close
+    if: github.event.action == 'closed'
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+
+    steps:
+      # 2026 Best Practice: API-driven decoupled teardown filtering by Meta Tags
+      - name: Purge Vercel Deployments via REST API
+        run: |
+          echo "Initiating search for deployments associated with PR #${PR_NUMBER}..."
+
+          # Fetch all active deployments for the specific organizational project
+          DEPLOYMENTS_JSON=$(curl -s -X GET "https://api.vercel.com/v6/deployments/?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_ORG_ID}" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}")
+
+          # FIX 2: Added array iterator [] so select() can iterate over each deployment object
+          # FIX 1: Replaced bare "if; then" with a proper condition checking for empty string
+          TARGET_UIDS=$(echo "$DEPLOYMENTS_JSON" | jq -r --arg PR "$PR_NUMBER" \
+            '.deployments[] | select(.meta.githubPrId == $PR) | .uid')
+
+          if [ -z "$TARGET_UIDS" ]; then
+            echo "No active preview deployments found for this PR. Exiting."
+            exit 0
+          fi
+
+          # Iterate through target list and systematically transmit deletion commands
+          for uid in $TARGET_UIDS; do
+            echo "Transmitting deletion request for Vercel deployment UID: $uid"
+            curl -s -X DELETE "https://api.vercel.com/v13/deployments/${uid}?teamId=${VERCEL_ORG_ID}" \
+              -H "Authorization: Bearer ${VERCEL_TOKEN}"
+          done
+
+          echo "All preview environments for PR #${PR_NUMBER} have been successfully purged."
