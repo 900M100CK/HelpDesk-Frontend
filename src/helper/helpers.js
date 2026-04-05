@@ -1,0 +1,32 @@
+import axios from 'axios';
+
+// Đổi port theo đúng backend của bạn
+const baseURL = 'http://127.0.0.1:5000/api/helpdesk/';
+
+const handleError = fn => (...params) =>
+  fn(...params).catch(error => {
+    console.error(error);
+  });
+
+export const api = {
+  getTicket: handleError(async id => {
+    const res = await axios.get(baseURL + id);
+    return res.data; // Trả về object response từ server { success: true, data: ... }
+  }),
+  getTickets: handleError(async () => {
+    const res = await axios.get(baseURL);
+    return res.data;
+  }),
+  deleteTicket: handleError(async id => {
+    const res = await axios.delete(baseURL + id);
+    return res.data;
+  }),
+  createTicket: handleError(async payload => {
+    const res = await axios.post(baseURL, payload);
+    return res.data;
+  }),
+  updateTicket: handleError(async payload => {
+    const res = await axios.put(baseURL + payload._id, payload);
+    return res.data;
+  })
+};
