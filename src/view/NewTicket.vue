@@ -23,8 +23,11 @@ export default {
       }
 
       alert('Tạo ticket thành công!');
-      this.$router.push(`/tickets/${res.data._id}`);
+      const id = res.data?._id || res._id;  // tự động thử cả 2 cấu trúc
+      this.$router.push(`/tickets/${id}`);
     }
   }
 };
+
+
 </script>
