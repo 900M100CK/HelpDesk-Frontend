@@ -2,21 +2,18 @@
   <div class="ui container" style="margin-top: 20px">
     <h1 class="ui header">
       Staff Training Quiz
-      <div class="sub header">Ghép mã lỗi với phản hồi đúng</div>
+      <div class="sub header">Bài kiểm tra kỹ năng phản hồi Helpdesk</div>
     </h1>
 
-    <!-- Loading -->
     <div v-if="loading" class="ui active inline loader"></div>
 
-    <!-- Không có ticket -->
-    <div v-else-if="tickets.length === 0" class="ui warning message">
-      <p>Chưa có ticket nào trong hệ thống để tạo quiz.</p>
+    <div v-else-if="tickets.length < 4" class="ui warning message">
+      <p>Cần ít nhất 4 tickets trong hệ thống để tạo bài trắc nghiệm (để đủ 4 đáp án). Hiện tại có {{ tickets.length }} tickets.</p>
       <router-link to="/tickets/new" class="ui button positive">
-        Tạo ticket đầu tiên
+        Tạo thêm ticket
       </router-link>
     </div>
 
-    <!-- Kết quả -->
     <div v-else-if="submitted" class="ui segment">
       <h2 class="ui header" :class="scoreColor">
         Kết quả: {{ score }} / {{ questions.length }} đúng
@@ -30,7 +27,8 @@
       <table class="ui celled table" style="margin-top: 20px">
         <thead>
           <tr>
-            <th>Mã lỗi</th>
+            <th>Loại câu hỏi</th>
+            <th>Câu hỏi</th>
             <th>Câu trả lời của bạn</th>
             <th>Đáp án đúng</th>
             <th>Kết quả</th>
@@ -38,11 +36,16 @@
         </thead>
         <tbody>
           <tr v-for="(q, i) in questions" :key="i">
-            <td><strong>{{ q.key }}</strong></td>
-            <td>{{ answers[i] || '(bỏ trống)' }}</td>
-            <td>{{ q.value }}</td>
             <td>
-              <span v-if="answers[i] === q.value" class="ui green label">✓ Đúng</span>
+              <span class="ui label" :class="q.type === 'guessValue' ? 'blue' : 'teal'">
+                {{ q.type === 'guessValue' ? 'Tìm phản hồi' : 'Tìm mã lỗi' }}
+              </span>
+            </td>
+            <td><strong>{{ q.questionText }}</strong></td>
+            <td>{{ answers[i] || '(bỏ trống)' }}</td>
+            <td>{{ q.correctAnswer }}</td>
+            <td>
+              <span v-if="answers[i] === q.correctAnswer" class="ui green label">✓ Đúng</span>
               <span v-else class="ui red label">✗ Sai</span>
             </td>
           </tr>
@@ -50,23 +53,22 @@
       </table>
 
       <button class="ui primary button" style="margin-top: 15px" @click="restart">
-        Làm lại
+        Làm lại bài Test
       </button>
     </div>
 
-    <!-- Quiz -->
     <div v-else>
-      <!-- Tiến độ -->
       <div class="ui message">
-        Câu {{ currentIndex + 1 }} / {{ questions.length }}
+        Câu {{ currentIndex + 1 }} / {{ questions.length }} 
+        <span class="ui right floated basic label">
+          Loại: {{ currentQuestion.type === 'guessValue' ? 'Cho Mã - Chọn Lời' : 'Cho Lời - Chọn Mã' }}
+        </span>
       </div>
 
-      <!-- Câu hỏi hiện tại -->
       <div class="ui padded segment">
-        <h3>Mã lỗi: <span class="ui blue label large">{{ currentQuestion.key }}</span></h3>
+        <h3>{{ currentQuestion.questionLabel }}: <span class="ui blue label large">{{ currentQuestion.questionText }}</span></h3>
         <p style="margin-top: 10px; color: gray">
-          Category: {{ currentQuestion.category }} |
-          Priority: {{ currentQuestion.priority }}
+          Category: {{ currentQuestion.category }} | Priority: {{ currentQuestion.priority }}
         </p>
 
         <div style="margin-top: 15px">
@@ -97,7 +99,7 @@
           >
             {{ isLastQuestion ? 'Nộp bài' : 'Câu tiếp theo' }}
           </button>
-          <button class="ui button" @click="restart">Bắt đầu lại</button>
+          <button class="ui button" @click="restart">Xáo trộn & Làm lại</button>
         </div>
       </div>
     </div>
@@ -124,7 +126,9 @@ export default {
     const res = await api.getTickets();
     if (res?.success) {
       this.tickets = res.data;
-      this.buildQuiz();
+      if (this.tickets.length >= 4) {
+        this.buildQuiz();
+      }
     }
     this.loading = false;
   },
@@ -139,7 +143,7 @@ export default {
       return this.currentIndex === this.questions.length - 1;
     },
     score() {
-      return this.questions.filter((q, i) => this.answers[i] === q.value).length;
+      return this.questions.filter((q, i) => this.answers[i] === q.correctAnswer).length;
     },
     scorePercent() {
       if (!this.questions.length) return 0;
@@ -158,24 +162,47 @@ export default {
   },
   methods: {
     buildQuiz() {
-      // Shuffle tickets và lấy tối đa 10 câu
+      // Lấy tối đa 10 câu ngẫu nhiên
       const shuffled = [...this.tickets].sort(() => Math.random() - 0.5);
       const selected = shuffled.slice(0, Math.min(10, shuffled.length));
 
-      // Với mỗi câu, tạo 4 lựa chọn: 1 đúng + 3 sai ngẫu nhiên từ các ticket khác
       this.questions = selected.map(ticket => {
-        const wrongOptions = this.tickets
-          .filter(t => t._id !== ticket._id)
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 3)
-          .map(t => t.value);
+        // Tỉ lệ 50% ra câu hỏi tìm Value, 50% ra câu hỏi tìm Key
+        const isGuessValue = Math.random() > 0.5;
 
-        const options = [...wrongOptions, ticket.value]
-          .sort(() => Math.random() - 0.5);
+        let questionLabel, questionText, correctAnswer, wrongOptions;
+
+        if (isGuessValue) {
+          // CHẾ ĐỘ 1: Cho Key, tìm Value
+          questionLabel = 'Mã lỗi (Key)';
+          questionText = ticket.key;
+          correctAnswer = ticket.value;
+          
+          wrongOptions = this.tickets
+            .filter(t => t._id !== ticket._id)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 3)
+            .map(t => t.value);
+        } else {
+          // CHẾ ĐỘ 2: Cho Value, tìm Key
+          questionLabel = 'Phản hồi mẫu (Value)';
+          questionText = ticket.value;
+          correctAnswer = ticket.key;
+          
+          wrongOptions = this.tickets
+            .filter(t => t._id !== ticket._id)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 3)
+            .map(t => t.key);
+        }
+
+        const options = [...wrongOptions, correctAnswer].sort(() => Math.random() - 0.5);
 
         return {
-          key: ticket.key,
-          value: ticket.value,
+          type: isGuessValue ? 'guessValue' : 'guessKey',
+          questionLabel,
+          questionText,
+          correctAnswer,
           category: ticket.category,
           priority: ticket.priority,
           options

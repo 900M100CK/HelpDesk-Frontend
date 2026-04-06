@@ -2,10 +2,27 @@
   <div>
     <h1>Danh sách Helpdesk Tickets</h1>
 
+    <div class="ui form" style="margin-bottom: 20px;">
+      <div class="field">
+        <div class="ui fluid icon input">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Tìm kiếm theo Key, Category hoặc nội dung câu trả lời..."
+          />
+          <i class="search icon"></i>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="toastMessage" class="ui positive message">
+      <i class="check icon"></i> {{ toastMessage }}
+    </div>
+
     <div v-if="loading">Đang tải...</div>
 
-    <div v-else-if="tickets.length === 0">
-      <p>Chưa có ticket nào.</p>
+    <div v-else-if="filteredTickets.length === 0">
+      <p>Không tìm thấy dữ liệu phù hợp.</p>
       <router-link to="/tickets/new" class="ui button positive">
         Tạo ticket mới
       </router-link>
@@ -17,21 +34,35 @@
           <th>Key</th>
           <th>Category</th>
           <th>Priority</th>
-          <th colspan="3"></th>
+          <th>Response (Value)</th> <th colspan="4" class="center aligned">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(t, i) in tickets" :key="i">
-          <td>{{ t.key }}</td>
+        <tr 
+          v-for="(t, i) in filteredTickets" 
+          :key="i"
+          :class="getPriorityClass(t.priority)"
+        >
+          <td><strong>{{ t.key }}</strong></td>
           <td>{{ t.category }}</td>
           <td>{{ t.priority }}</td>
+          <td>{{ t.value }}</td> <td width="50" class="center aligned">
+            <button
+              class="ui icon button"
+              title="Copy Response"
+              @click="copyResponse(t.value)"
+            >
+              <i class="copy icon"></i>
+            </button>
+          </td>
+
           <td width="75" class="center aligned">
-            <router-link :to="{ name: 'show', params: { id: t._id } }">
+            <router-link :to="{ name: 'show', params: { id: t._id } }" class="ui mini button">
               Show
             </router-link>
           </td>
           <td width="75" class="center aligned">
-            <router-link :to="{ name: 'edit', params: { id: t._id } }">
+            <router-link :to="{ name: 'edit', params: { id: t._id } }" class="ui mini primary button">
               Edit
             </router-link>
           </td>
@@ -57,8 +88,26 @@ export default {
   data() {
     return {
       tickets: [],
-      loading: true
+      loading: true,
+      searchQuery: '', // Biến lưu trữ từ khóa tìm kiếm
+      toastMessage: '' // Biến lưu trữ thông báo khi copy
     };
+  },
+  computed: {
+    // XỬ LÝ LỌC DỮ LIỆU (REAL-TIME FILTER)
+    filteredTickets() {
+      if (!this.searchQuery) return this.tickets;
+
+      const lowerCaseQuery = this.searchQuery.toLowerCase();
+      return this.tickets.filter(t => {
+        // Lọc qua nhiều trường để tìm kiếm thông minh hơn
+        return (
+          (t.key && t.key.toLowerCase().includes(lowerCaseQuery)) ||
+          (t.category && t.category.toLowerCase().includes(lowerCaseQuery)) ||
+          (t.value && t.value.toLowerCase().includes(lowerCaseQuery)) 
+        );
+      });
+    }
   },
   async mounted() {
     const res = await api.getTickets();
@@ -68,12 +117,44 @@ export default {
     this.loading = false;
   },
   methods: {
+    // HÀM ĐỔI MÀU BẢNG (Sử dụng class màu mặc định của Semantic UI)
+    getPriorityClass(priority) {
+      if (!priority) return '';
+      const p = priority.toLowerCase();
+      
+      // Bạn có thể điều chỉnh string này cho khớp với dữ liệu bạn lưu trong DB
+      if (p === 'urgent' || p === 'khẩn cấp') return 'negative'; // Đỏ
+      if (p === 'high' || p === 'cao') return 'warning'; // Vàng
+      if (p === 'low' || p === 'thấp') return 'positive'; // Xanh lá
+      
+      return ''; // Medium thì để màu nền trắng bình thường
+    },
+
+    // HÀM XỬ LÝ COPY VÀ HIỂN THỊ TOAST
+    async copyResponse(text) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        
+        // Hiện thông báo
+        this.toastMessage = 'Đã sao chép câu trả lời vào bộ nhớ tạm!';
+        
+        // Tự động tắt thông báo sau 2.5 giây
+        setTimeout(() => {
+          this.toastMessage = '';
+        }, 2500);
+      } catch (err) {
+        alert('Trình duyệt của bạn không hỗ trợ tính năng copy tự động.');
+      }
+    },
+
     async onDestroy(id) {
       const sure = window.confirm('Bạn có chắc chắn muốn xóa?');
       if (!sure) return;
 
       const res = await api.deleteTicket(id);
       if (res?.success) {
+        // Thay vì lọc mảng gốc, chúng ta cập nhật lại mảng tickets
         this.tickets = this.tickets.filter(t => t._id !== id);
       } else {
         alert('Xóa thất bại, thử lại!');

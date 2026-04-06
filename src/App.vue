@@ -24,6 +24,7 @@
         <span>New Ticket</span>
       </router-link>
       <router-link to="/quiz" class="item">Training Quiz</router-link>
+      <router-link to="/quiz2" class="item">Typing Quiz</router-link>
 
     </div>
   </div>
