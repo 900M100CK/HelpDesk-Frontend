@@ -23,6 +23,7 @@
         <i class="plus circle icon"></i>
         <span>New Ticket</span>
       </router-link>
+      <router-link to="/quiz" class="item">Training Quiz</router-link>
 
     </div>
   </div>
