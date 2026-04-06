@@ -1,29 +1,62 @@
 <template>
   <div>
     <h1>Chi Tiết Yêu Cầu</h1>
-    <div class="ui labeled input fluid" style="margin-bottom: 15px">
-      <div class="ui label">Key</div>
-      <input type="text" disabled :value="ticket.key" />
+
+    <div v-if="loading">Đang tải...</div>
+
+    <div v-else-if="ticket._id">
+      <div class="ui labeled input fluid" style="margin-bottom: 15px">
+        <div class="ui label">Key</div>
+        <input type="text" disabled :value="ticket.key" />
+      </div>
+
+      <div class="ui labeled input fluid" style="margin-bottom: 15px">
+        <div class="ui label">Nội dung</div>
+        <input type="text" disabled :value="ticket.value" />
+      </div>
+
+      <div class="ui labeled input fluid" style="margin-bottom: 15px">
+        <div class="ui label">Category</div>
+        <input type="text" disabled :value="ticket.category" />
+      </div>
+
+      <div class="ui labeled input fluid" style="margin-bottom: 15px">
+        <div class="ui label">Priority</div>
+        <input type="text" disabled :value="ticket.priority" />
+      </div>
+
+      <router-link
+        class="ui button positive"
+        :to="{ name: 'edit', params: { id: $route.params.id } }"
+      >
+        Chỉnh sửa Ticket
+      </router-link>
     </div>
-    <div class="ui labeled input fluid" style="margin-bottom: 15px">
-      <div class="ui label">Nội dung</div>
-      <input type="text" disabled :value="ticket.value" />
+
+    <div v-else>
+      <p>Không tìm thấy ticket.</p>
+      <router-link to="/tickets" class="ui button">Quay lại</router-link>
     </div>
-    
-    <router-link class="ui button positive" :to="{ name: 'edit', params: { id: this.$route.params.id }}">
-      Chỉnh sửa Ticket
-    </router-link>
   </div>
 </template>
 
 <script>
 import { api } from '../helper/helpers';
+
 export default {
   name: 'show-ticket',
-  data() { return { ticket: {} }; },
+  data() {
+    return {
+      ticket: {},
+      loading: true
+    };
+  },
   async mounted() {
     const res = await api.getTicket(this.$route.params.id);
-    this.ticket = res.data;
+    if (res?.success) {
+      this.ticket = res.data;
+    }
+    this.loading = false;
   }
 };
 </script>
