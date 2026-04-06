@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Đổi port theo đúng backend của bạn
-const baseURL = import.meta.env.VUE_APP_API_URL;
+const baseURL = process.env.VUE_APP_API_URL;
 
 const handleError = fn => (...params) =>
   fn(...params).catch(error => {
