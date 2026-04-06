@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Đổi port theo đúng backend của bạn
-const baseURL = 'http://127.0.0.1:5000/api/helpdesk/';
+const baseURL = import.meta.env.VITE_API_URL;
 
 const handleError = fn => (...params) =>
   fn(...params).catch(error => {
