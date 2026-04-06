@@ -5,11 +5,8 @@
     <div class="ui form" style="margin-bottom: 20px;">
       <div class="field">
         <div class="ui fluid icon input">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Tìm kiếm theo Key, Category hoặc nội dung câu trả lời..."
-          />
+          <input type="text" v-model="searchQuery"
+            placeholder="Tìm kiếm theo Key, Category hoặc nội dung câu trả lời..." />
           <i class="search icon"></i>
         </div>
       </div>
@@ -34,29 +31,24 @@
           <th>Key</th>
           <th>Category</th>
           <th>Priority</th>
-          <th>Response (Value)</th> <th colspan="4" class="center aligned">Actions</th>
+          <th>Response (Value)</th>
+          <th colspan="4" class="center aligned">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr 
-          v-for="(t, i) in filteredTickets" 
-          :key="i"
-          :class="getPriorityClass(t.priority)"
-        >
+        <tr v-for="(t, i) in filteredTickets" :key="i">
           <td><strong>{{ t.key }}</strong></td>
           <td>{{ t.category }}</td>
-          <td>{{ t.priority }}</td>
-          <td>{{ t.value }}</td> <td width="50" class="center aligned">
-            <button
-              class="ui icon button"
-              title="Copy Response"
-              @click="copyResponse(t.value)"
-            >
-              <i class="copy icon"></i>
-            </button>
+
+          <td class="center aligned">
+            <div class="ui label" :class="getPriorityColor(t.priority)">
+              {{ t.priority || 'Chưa xếp loại' }}
+            </div>
           </td>
 
-          <td width="75" class="center aligned">
+          <td>{{ t.value }}</td>
+
+          <td width="50" class="center aligned">
             <router-link :to="{ name: 'show', params: { id: t._id } }" class="ui mini button">
               Show
             </router-link>
@@ -67,10 +59,7 @@
             </router-link>
           </td>
           <td width="75" class="center aligned">
-            <button
-              class="ui negative mini button"
-              @click="onDestroy(t._id)"
-            >
+            <button class="ui negative mini button" @click="onDestroy(t._id)">
               Destroy
             </button>
           </td>
@@ -104,7 +93,7 @@ export default {
         return (
           (t.key && t.key.toLowerCase().includes(lowerCaseQuery)) ||
           (t.category && t.category.toLowerCase().includes(lowerCaseQuery)) ||
-          (t.value && t.value.toLowerCase().includes(lowerCaseQuery)) 
+          (t.value && t.value.toLowerCase().includes(lowerCaseQuery))
         );
       });
     }
@@ -118,16 +107,19 @@ export default {
   },
   methods: {
     // HÀM ĐỔI MÀU BẢNG (Sử dụng class màu mặc định của Semantic UI)
-    getPriorityClass(priority) {
+    getPriorityColor(priority) {
       if (!priority) return '';
-      const p = priority.toLowerCase();
-      
-      // Bạn có thể điều chỉnh string này cho khớp với dữ liệu bạn lưu trong DB
-      if (p === 'urgent' || p === 'khẩn cấp') return 'negative'; // Đỏ
-      if (p === 'high' || p === 'cao') return 'warning'; // Vàng
-      if (p === 'low' || p === 'thấp') return 'positive'; // Xanh lá
-      
-      return ''; // Medium thì để màu nền trắng bình thường
+
+      // Chuyển về chữ thường và cắt bỏ khoảng trắng 2 đầu để so sánh chính xác 100%
+      const p = priority.toString().trim().toLowerCase();
+
+      // Bảng màu chuẩn của Semantic UI Label
+      if (p === 'urgent' || p === 'khẩn cấp') return 'red';
+      if (p === 'high' || p === 'cao') return 'orange';
+      if (p === 'medium' || p === 'trung bình') return 'blue';
+      if (p === 'low' || p === 'thấp') return 'green';
+
+      return 'grey'; // Màu mặc định nếu không khớp từ khóa nào
     },
 
     // HÀM XỬ LÝ COPY VÀ HIỂN THỊ TOAST
@@ -135,10 +127,10 @@ export default {
       if (!text) return;
       try {
         await navigator.clipboard.writeText(text);
-        
+
         // Hiện thông báo
         this.toastMessage = 'Đã sao chép câu trả lời vào bộ nhớ tạm!';
-        
+
         // Tự động tắt thông báo sau 2.5 giây
         setTimeout(() => {
           this.toastMessage = '';
