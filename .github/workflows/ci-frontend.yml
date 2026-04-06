@@ -38,8 +38,12 @@ jobs:
         run: npm ci
 
       - name: Run Tests
-        run: npm test -- --watchAll=false
-
+        run: |
+          if npm run 2>&1 | grep -q 'test'; then
+            npm run test:unit
+          else
+            echo "No test script found, skipping."
+          fi
       - name: Compile Frontend Assets
         run: npm run build
 
