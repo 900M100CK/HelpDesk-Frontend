@@ -1,26 +1,54 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <!-- Navbar -->
+    <div class="ui inverted segment navbar">
+      <div class="ui center aligned container">
+        <div class="ui large secondary inverted pointing menu compact">
+      <!-- Tickets -->
+      <router-link
+        to="/tickets"
+        class="item"
+        exact-active-class="active"
+      >
+        <i class="list icon"></i>
+        <span>Tickets</span>
+      </router-link>
+
+      <!-- New Ticket -->
+      <router-link
+        to="/tickets/new"
+        class="item"
+        exact-active-class="active"
+      >
+        <i class="plus circle icon"></i>
+        <span>New Ticket</span>
+      </router-link>
+
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="ui text container">
+  <div class="ui one column grid">
+    <div class="column">
+      <router-view />
+    </div>
+  </div>
+</div>
+```
+
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  name: 'App'
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+#app > div.navbar {
+  margin-bottom: 1.5em;
 }
 </style>
