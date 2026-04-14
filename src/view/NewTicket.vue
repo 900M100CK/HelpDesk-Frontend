@@ -17,11 +17,11 @@ export default {
       const res = await api.createTicket(ticket);
 
       if (!res || !res.success) {
-        alert('Tạo ticket thất bại, kiểm tra lại kết nối!');
+        alert('Ticket creation failed, check your connection!');
         return;
       }
 
-      alert('Tạo ticket thành công!');
+      alert('Ticket created successfully!');
       const id = res.data?._id || res._id;
       this.$router.push(`/tickets/${id}`);
     }
