@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h1>Chỉnh Sửa Ticket</h1>
+    <h1>Edit Ticket</h1>
 
-    <div v-if="loading">Đang tải...</div>
+    <div v-if="loading">Loading...</div>
 
     <helpdesk-form
       v-else
@@ -36,10 +36,10 @@ export default {
     async createOrUpdate(ticket) {
       const res = await api.updateTicket(ticket);
       if (res?.success) {
-        alert('Cập nhật ticket thành công!');
+        alert('Ticket update successful!');
         this.$router.push(`/tickets/${ticket._id}`);
       } else {
-        alert('Cập nhật thất bại, thử lại!');
+        alert('Update failed, try again!');
       }
     }
   }
