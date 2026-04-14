@@ -1,6 +1,6 @@
 <template>
   <form action="#" @submit.prevent="onSubmit">
-    <p v-if="errorsPresent" class="error">Vui lòng điền mã và nội dung!</p>
+    <p v-if="errorsPresent" class="error">Please fill in the code and content!</p>
 
     <div class="ui labeled input fluid" style="margin-bottom: 15px;">
       <div class="ui label">Key</div>
@@ -8,7 +8,7 @@
     </div>
 
     <div class="ui labeled input fluid" style="margin-bottom: 15px;">
-      <div class="ui label">Nội dung</div>
+      <div class="ui label">Content</div>
       <input type="text" placeholder="Mô tả lỗi..." v-model="localTicket.value" />
     </div>
 
@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     onSubmit: function() {
-      // Validate đơn giản [cite: 250, 251]
+      // Validate
       if (this.localTicket.key === '' || this.localTicket.value === '') {
         this.errorsPresent = true;
       } else {
