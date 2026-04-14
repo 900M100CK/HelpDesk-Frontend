@@ -18,7 +18,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(), // thay cho mode: 'history'
+  history: createWebHistory(), // replace for mode: 'history'
   routes,
   linkActiveClass: 'active'
 });
