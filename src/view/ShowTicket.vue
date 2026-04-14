@@ -34,8 +34,8 @@
     </div>
 
     <div v-else>
-      <p>Không tìm thấy ticket.</p>
-      <router-link to="/tickets" class="ui button">Quay lại</router-link>
+      <p>No ticket found.</p>
+      <router-link to="/tickets" class="ui button">Back</router-link>
     </div>
   </div>
 </template>
