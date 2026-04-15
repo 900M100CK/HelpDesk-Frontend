@@ -9,7 +9,7 @@
 
     <div class="ui labeled input fluid" style="margin-bottom: 15px;">
       <div class="ui label">Content</div>
-      <input type="text" placeholder="Mô tả lỗi..." v-model="localTicket.value" />
+      <input type="text" placeholder="Description..." v-model="localTicket.value" />
     </div>
 
     <div class="ui labeled input fluid" style="margin-bottom: 15px;">

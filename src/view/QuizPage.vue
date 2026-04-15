@@ -64,7 +64,7 @@
       <div class="ui message">
         Câu {{ currentIndex + 1 }} / {{ questions.length }} 
         <span class="ui right floated basic label">
-          Loại: {{ currentQuestion.type === 'guessValue' ? 'Cho Mã - Chọn Lời' : 'Cho Lời - Chọn Mã' }}
+          Loại: {{ currentQuestion.type === 'guessValue' ? 'give code - choose answer' : 'give answer - choose code' }}
         </span>
       </div>
 
