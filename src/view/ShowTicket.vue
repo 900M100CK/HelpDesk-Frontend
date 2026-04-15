@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h1>Chi Tiết Yêu Cầu</h1>
+    <h1>Ticket detail</h1>
 
-    <div v-if="loading">Đang tải...</div>
+    <div v-if="loading">Loading...</div>
 
     <div v-else-if="ticket._id">
       <div class="ui labeled input fluid" style="margin-bottom: 15px">
@@ -11,7 +11,7 @@
       </div>
 
       <div class="ui labeled input fluid" style="margin-bottom: 15px">
-        <div class="ui label">Nội dung</div>
+        <div class="ui label">Content</div>
         <input type="text" disabled :value="ticket.value" />
       </div>
 
@@ -29,13 +29,13 @@
         class="ui button positive"
         :to="{ name: 'edit', params: { id: $route.params.id } }"
       >
-        Chỉnh sửa Ticket
+        Edit ticket
       </router-link>
     </div>
 
     <div v-else>
-      <p>Không tìm thấy ticket.</p>
-      <router-link to="/tickets" class="ui button">Quay lại</router-link>
+      <p>No ticket found.</p>
+      <router-link to="/tickets" class="ui button">Back</router-link>
     </div>
   </div>
 </template>

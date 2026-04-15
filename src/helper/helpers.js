@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-// for development, you can set the baseURL to my domain in Vercel
-// const baseURL = process.env.VUE_APP_API_URL;
-
-// For local development, use the local server URL
-const baseURL ='http://localhost:5000/api/helpdesk/';
+// Đổi port theo đúng backend của bạn
+const baseURL = process.env.VUE_APP_API_URL || 'http://localhost:5000/api/helpdesk/';
 
 const handleError = fn => (...params) =>
   fn(...params).catch(error => {
@@ -14,7 +11,7 @@ const handleError = fn => (...params) =>
 export const api = {
   getTicket: handleError(async id => {
     const res = await axios.get(baseURL + id);
-    return res.data; // Trả về object response từ server { success: true, data: ... }
+    return res.data; // return object response from server { success: true, data: ... }
   }),
   getTickets: handleError(async () => {
     const res = await axios.get(baseURL);

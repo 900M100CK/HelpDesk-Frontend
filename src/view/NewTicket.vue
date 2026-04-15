@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Tạo Yêu Cầu Mới</h1>
+    <h1>Create a new ticket</h1>
     <helpdesk-form @createOrUpdate="createOrUpdate"></helpdesk-form>
   </div>
 </template>
@@ -16,14 +16,13 @@ export default {
     createOrUpdate: async function(ticket) {
       const res = await api.createTicket(ticket);
 
-      // res có thể undefined nếu request lỗi (handleError chỉ log, không throw)
       if (!res || !res.success) {
-        alert('Tạo ticket thất bại, kiểm tra lại kết nối!');
+        alert('Ticket creation failed, check your connection!');
         return;
       }
 
-      alert('Tạo ticket thành công!');
-      const id = res.data?._id || res._id;  // tự động thử cả 2 cấu trúc
+      alert('Ticket created successfully!');
+      const id = res.data?._id || res._id;
       this.$router.push(`/tickets/${id}`);
     }
   }
