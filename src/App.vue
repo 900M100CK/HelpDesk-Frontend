@@ -23,9 +23,18 @@
         <i class="plus circle icon"></i>
         <span>New Ticket</span>
       </router-link>
-      <router-link to="/quiz" class="item">Training Quiz</router-link>
-      <router-link to="/quiz2" class="item">Typing Quiz</router-link>
-      <router-link to="/about" class="item">About Me</router-link>
+      <router-link to="/quiz" class="item">
+        <i class="question circle icon"></i>
+        <span>Training Quiz</span>
+      </router-link>
+      <router-link to="/quiz2" class="item">
+        <i class="keyboard icon"></i>
+        <span>Typing Quiz</span>
+      </router-link>
+      <router-link to="/about" class="item">
+        <i class="info circle icon"></i>
+        <span>About Me</span>
+      </router-link>
 
     </div>
   </div>

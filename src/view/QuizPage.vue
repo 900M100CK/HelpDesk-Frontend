@@ -20,7 +20,10 @@
       </h2>
       <div class="ui indicating progress" :data-percent="scorePercent">
         <div class="bar" :style="{ width: scorePercent + '%', background: scoreBarColor }">
-          <div class="progress">{{ scorePercent }}%</div>
+          <div class="progress">
+            <i :class="['icon', scoreIcon, scoreIconColor]"></i>
+            {{ scorePercent }}%
+          </div>
         </div>
       </div>
 
@@ -158,6 +161,16 @@ export default {
       if (this.scorePercent >= 80) return '#21ba45';
       if (this.scorePercent >= 50) return '#fbbd08';
       return '#db2828';
+    },
+    scoreIcon() {
+      if (this.scorePercent >= 80) return 'trophy';
+      if (this.scorePercent >= 50) return 'thumbs up';
+      return 'times circle';
+    },
+    scoreIconColor() {
+      if (this.scorePercent >= 80) return 'green';
+      if (this.scorePercent >= 50) return 'yellow';
+      return 'red';
     }
   },
   methods: {
