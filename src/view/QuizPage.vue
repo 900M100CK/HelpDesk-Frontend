@@ -2,21 +2,21 @@
   <div class="ui container" style="margin-top: 20px">
     <h1 class="ui header">
       Staff Training Quiz
-      <div class="sub header">Bài kiểm tra kỹ năng phản hồi Helpdesk</div>
+      <div class="sub header">Quiz for response handling of Helpdesk Tickets</div>
     </h1>
 
     <div v-if="loading" class="ui active inline loader"></div>
 
     <div v-else-if="tickets.length < 4" class="ui warning message">
-      <p>Cần ít nhất 4 tickets trong hệ thống để tạo bài trắc nghiệm (để đủ 4 đáp án). Hiện tại có {{ tickets.length }} tickets.</p>
+      <p>Need at least 4 tickets in the system to create a quiz (for 4 answer options). Currently there are {{ tickets.length }} tickets.</p>
       <router-link to="/tickets/new" class="ui button positive">
-        Tạo thêm ticket
+        Create More Tickets
       </router-link>
     </div>
 
     <div v-else-if="submitted" class="ui segment">
       <h2 class="ui header" :class="scoreColor">
-        Kết quả: {{ score }} / {{ questions.length }} đúng
+        Result: {{ score }} / {{ questions.length }} correct
       </h2>
       <div class="ui indicating progress" :data-percent="scorePercent">
         <div class="bar" :style="{ width: scorePercent + '%', background: scoreBarColor }">
@@ -30,33 +30,33 @@
       <table class="ui celled table" style="margin-top: 20px">
         <thead>
           <tr>
-            <th>Loại câu hỏi</th>
-            <th>Câu hỏi</th>
-            <th>Câu trả lời của bạn</th>
-            <th>Đáp án đúng</th>
-            <th>Kết quả</th>
+            <th>Question Type</th>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+            <th>Result</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(q, i) in questions" :key="i">
             <td>
               <span class="ui label" :class="q.type === 'guessValue' ? 'blue' : 'teal'">
-                {{ q.type === 'guessValue' ? 'Tìm phản hồi' : 'Tìm mã lỗi' }}
+                {{ q.type === 'guessValue' ? 'Find the Response' : 'Find the Error Code' }}
               </span>
             </td>
             <td><strong>{{ q.questionText }}</strong></td>
-            <td>{{ answers[i] || '(bỏ trống)' }}</td>
+            <td>{{ answers[i] || '(Empty)' }}</td>
             <td>{{ q.correctAnswer }}</td>
             <td>
-              <span v-if="answers[i] === q.correctAnswer" class="ui green label">✓ Đúng</span>
-              <span v-else class="ui red label">✗ Sai</span>
+              <span v-if="answers[i] === q.correctAnswer" class="ui green label">✓ Correct</span>
+              <span v-else class="ui red label">✗ Incorrect</span>
             </td>
           </tr>
         </tbody>
       </table>
 
       <button class="ui primary button" style="margin-top: 15px" @click="restart">
-        Làm lại bài Test
+        Take a Quiz Again
       </button>
     </div>
 
@@ -100,9 +100,9 @@
             :disabled="!selectedAnswer"
             @click="nextQuestion"
           >
-            {{ isLastQuestion ? 'Nộp bài' : 'Câu tiếp theo' }}
+            {{ isLastQuestion ? 'Submit' : 'Next Question' }}
           </button>
-          <button class="ui button" @click="restart">Xáo trộn & Làm lại</button>
+          <button class="ui button" @click="restart">Shuffle & Restart</button>
         </div>
       </div>
     </div>

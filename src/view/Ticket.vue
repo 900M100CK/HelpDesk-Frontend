@@ -47,7 +47,7 @@
           </td>
 
           <td>{{ t.value }}</td>
-          
+
           <td width="75" class="center aligned">
             <button class="ui mini teal button" @click="copyResponse(t.value)">
               Copy
@@ -131,27 +131,26 @@ export default {
       try {
         await navigator.clipboard.writeText(text);
 
-        this.toastMessage = 'Đã sao chép câu trả lời vào bộ nhớ tạm!';
+        this.toastMessage = 'Already copied to clipboard!';
 
         
         setTimeout(() => {
           this.toastMessage = '';
         }, 2500);
       } catch (err) {
-        alert('Trình duyệt của bạn không hỗ trợ tính năng copy tự động.');
+        alert('Your browser does not support the automatic copy feature.');
       }
     },
 
     async onDestroy(id) {
-      const sure = window.confirm('Bạn có chắc chắn muốn xóa?');
+      const sure = window.confirm('Are you sure you want to delete this ticket?');
       if (!sure) return;
 
       const res = await api.deleteTicket(id);
       if (res?.success) {
-        // Thay vì lọc mảng gốc, chúng ta cập nhật lại mảng tickets
         this.tickets = this.tickets.filter(t => t._id !== id);
       } else {
-        alert('Xóa thất bại, thử lại!');
+        alert('Failed to delete, please try again!');
       }
     }
   }

@@ -2,39 +2,39 @@
   <div class="ui container" style="margin-top: 20px">
     <h1 class="ui header">
       Staff Training Quiz: Typing Mode
-      <div class="sub header">Điền thông tin còn thiếu vào ô trống</div>
+      <div class="sub header">Fill in the blanks</div>
     </h1>
 
     <div v-if="loading" class="ui active inline loader"></div>
 
     <div v-else-if="tickets.length === 0" class="ui warning message">
-      <p>Chưa có ticket nào trong hệ thống.</p>
+      <p>Don't have any tickets available.</p>
     </div>
 
     <div v-else-if="submitted" class="ui segment">
       <h2 class="ui header" :class="scoreColor">
-        Điểm số: {{ score }} / {{ questions.length }}
+        Score: {{ score }} / {{ questions.length }}
       </h2>
       
       <table class="ui celled table">
         <thead>
           <tr>
-            <th>Đề bài cho</th>
-            <th>Câu bạn nhập</th>
-            <th>Đáp án đúng</th>
-            <th>Kết quả</th>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+            <th>Result</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(ans, i) in answerHistory" :key="i" :class="{ positive: ans.isCorrect, negative: !ans.isCorrect }">
             <td>
               <div class="ui ribbon label" :class="ans.type === 'guessKey' ? 'teal' : 'blue'">
-                {{ ans.type === 'guessKey' ? 'Cho Value -> Tìm Key' : 'Cho Key -> Tìm Value' }}
+                {{ ans.type === 'guessKey' ? 'Choose Value -> Find Key' : 'Choose Key -> Find Value' }}
               </div>
               <br/>
               <i>{{ ans.givenText }}</i>
             </td>
-            <td><strong>{{ ans.userAnswer || '(Bỏ trống)' }}</strong></td>
+            <td><strong>{{ ans.userAnswer || '(Empty)' }}</strong></td>
             <td>{{ ans.correctAnswer }}</td>
             <td>
               <i class="icon" :class="ans.isCorrect ? 'check green large' : 'times red large'"></i>
@@ -43,43 +43,43 @@
         </tbody>
       </table>
 
-      <button class="ui primary button" @click="restart">Làm lại bài Test</button>
+      <button class="ui primary button" @click="restart">Take a Quiz Again</button>
     </div>
 
     <div v-else>
       <div class="ui message">
         Câu {{ currentIndex + 1 }} / {{ questions.length }}
         <span class="ui right floated basic label">
-          Nhiệm vụ: {{ currentQuestion.type === 'guessKey' ? 'Nhập Mã Lỗi' : 'Nhập Phản Hồi' }}
+          Task: {{ currentQuestion.type === 'guessKey' ? 'Find the Error Code' : 'Find the Response' }}
         </span>
       </div>
 
       <div class="ui padded segment form">
         <div class="ui info message" v-if="currentQuestion.type === 'guessValue'">
-          <i class="info circle icon"></i> Hãy nhập chính xác nội dung phản hồi cho mã lỗi này.
+          <i class="info circle icon"></i> Please enter the correct response for this error code.
         </div>
         <div class="ui info message" v-else>
-          <i class="info circle icon"></i> Đọc nội dung phản hồi và nhập mã lỗi tương ứng.
+          <i class="info circle icon"></i> Read the response and enter the corresponding error code.
         </div>
 
         <div class="field" :class="{ disabled: currentQuestion.type === 'guessValue' }">
-          <label>Mã lỗi (Key)</label>
+          <label>error code (Key)</label>
           <input 
             type="text" 
             v-model="inputKey" 
             :readonly="currentQuestion.type === 'guessValue'"
-            placeholder="Nhập mã lỗi vào đây..."
+            placeholder="input key here..."
             @keyup.enter="nextQuestion"
           />
         </div>
 
         <div class="field" :class="{ disabled: currentQuestion.type === 'guessKey' }">
-          <label>Phản hồi mẫu (Value)</label>
+          <label>Response (Value)</label>
           <textarea 
             v-model="inputValue" 
             :readonly="currentQuestion.type === 'guessKey'"
             rows="3"
-            placeholder="Nhập nội dung phản hồi vào đây..."
+            placeholder="input response here..."
           ></textarea>
         </div>
 
@@ -89,7 +89,7 @@
             @click="nextQuestion"
             :disabled="!isAnswerProvided"
           >
-            {{ isLastQuestion ? 'Nộp bài' : 'Xác nhận & Câu tiếp' }}
+            {{ isLastQuestion ? 'Submit' : 'Confirm & Next Question' }}
           </button>
         </div>
       </div>
@@ -109,11 +109,11 @@ export default {
       questions: [],
       currentIndex: 0,
       
-      // 2 biến ràng buộc (v-model) cho 2 ô input
+    
       inputKey: '',
       inputValue: '',
       
-      answerHistory: [], // Lưu lịch sử làm bài để in ra bảng kết quả
+      answerHistory: [],
       submitted: false
     };
   },
@@ -132,7 +132,7 @@ export default {
     isLastQuestion() {
       return this.currentIndex === this.questions.length - 1;
     },
-    // Kiểm tra xem user đã nhập chữ vào ô trống chưa để mở khóa nút Xác nhận
+  
     isAnswerProvided() {
       if (this.currentQuestion.type === 'guessKey') {
         return this.inputKey.trim().length > 0;
@@ -156,7 +156,7 @@ export default {
       const selected = shuffled.slice(0, Math.min(10, shuffled.length));
 
       this.questions = selected.map(ticket => {
-        // Random 50/50 xem ô nào bị khóa
+        // Random 50/50 
         const type = Math.random() > 0.5 ? 'guessKey' : 'guessValue';
         return {
           type,
@@ -171,17 +171,16 @@ export default {
       this.setupCurrentQuestion();
     },
     
-    // Hàm này thiết lập giá trị hiển thị lên 2 ô input khi chuyển câu
     setupCurrentQuestion() {
       const q = this.currentQuestion;
       if (q.type === 'guessKey') {
-        // Cho Value, ẩn Key
+        // given Value, hide Key
         this.inputValue = q.value;
-        this.inputKey = ''; // Để trống cho user nhập
+        this.inputKey = ''; 
       } else {
-        // Cho Key, ẩn Value
+        // given Key, hide Value
         this.inputKey = q.key;
-        this.inputValue = ''; // Để trống cho user nhập
+        this.inputValue = ''; 
       }
     },
 
@@ -193,7 +192,7 @@ export default {
       let correctAnswer = '';
       let givenText = '';
 
-      // Logic chấm điểm: Loại bỏ khoảng trắng 2 đầu và chuyển về chữ thường để so sánh dễ hơn
+      // Logic to grade: delete extra spaces and ignore case
       if (q.type === 'guessKey') {
         userAnswer = this.inputKey.trim();
         correctAnswer = q.key;
@@ -206,7 +205,7 @@ export default {
 
       const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
 
-      // Lưu lại lịch sử
+      // save history
       this.answerHistory.push({
         type: q.type,
         givenText,
@@ -215,7 +214,7 @@ export default {
         isCorrect
       });
 
-      // Chuyển câu hoặc nộp bài
+      // change question or submit
       if (this.isLastQuestion) {
         this.submitted = true;
       } else {
@@ -232,7 +231,6 @@ export default {
 </script>
 
 <style scoped>
-/* CSS làm mờ nhẹ ô bị khóa để tăng trải nghiệm người dùng */
 .ui.form .field.disabled label {
   color: #888;
 }
