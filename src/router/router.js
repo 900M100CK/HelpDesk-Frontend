@@ -6,6 +6,7 @@ import ShowTicket from './../view/ShowTicket.vue';
 import EditTicket from './../view/EditTicket.vue';
 import QuizPage from './../view/QuizPage.vue';  
 import QuizPage2 from './../view/QuizPage2.vue';  
+import AboutMe from './../view/AboutMe.vue';
 
 const routes = [
   { path: '/', redirect: '/tickets' },
@@ -14,7 +15,8 @@ const routes = [
   { path: '/tickets/:id', name: 'show', component: ShowTicket },
   { path: '/tickets/:id/edit', name: 'edit', component: EditTicket },
   {path: '/quiz', name: 'quiz', component: QuizPage}, // lazy load quiz component
-  {path: '/quiz2', name: 'quiz2', component: QuizPage2} // lazy load quiz2 component
+  {path: '/quiz2', name: 'quiz2', component: QuizPage2}, // lazy load quiz2 component
+  { path: '/about', name: 'about', component: AboutMe }
 ];
 
 const router = createRouter({

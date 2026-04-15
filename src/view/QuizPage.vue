@@ -162,12 +162,12 @@ export default {
   },
   methods: {
     buildQuiz() {
-      // Lấy tối đa 10 câu ngẫu nhiên
+      
       const shuffled = [...this.tickets].sort(() => Math.random() - 0.5);
       const selected = shuffled.slice(0, Math.min(10, shuffled.length));
 
       this.questions = selected.map(ticket => {
-        // Tỉ lệ 50% ra câu hỏi tìm Value, 50% ra câu hỏi tìm Key
+        
         const isGuessValue = Math.random() > 0.5;
 
         let questionLabel, questionText, correctAnswer, wrongOptions;

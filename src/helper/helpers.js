@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// Đổi port theo đúng backend của bạn
-const baseURL = process.env.VUE_APP_API_URL || 'http://localhost:5000/api/helpdesk/';
+// for development, you can set the baseURL to my domain in Vercel
+// const baseURL = process.env.VUE_APP_API_URL;
+
+// For local development, use the local server URL
+const baseURL ='http://localhost:5000/api/helpdesk/';
 
 const handleError = fn => (...params) =>
   fn(...params).catch(error => {

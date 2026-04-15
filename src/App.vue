@@ -25,6 +25,7 @@
       </router-link>
       <router-link to="/quiz" class="item">Training Quiz</router-link>
       <router-link to="/quiz2" class="item">Typing Quiz</router-link>
+      <router-link to="/about" class="item">About Me</router-link>
 
     </div>
   </div>
@@ -38,7 +39,6 @@
     </div>
   </div>
 </div>
-```
 
   </div>
 </template>

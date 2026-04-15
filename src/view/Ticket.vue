@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h1>Danh sách Helpdesk Tickets</h1>
+    <h1>Helpdesk Tickets List</h1>
 
     <div class="ui form" style="margin-bottom: 20px;">
       <div class="field">
         <div class="ui fluid icon input">
           <input type="text" v-model="searchQuery"
-            placeholder="Tìm kiếm theo Key, Category hoặc nội dung câu trả lời..." />
+            placeholder="Search by Key, Category or response content..." />
           <i class="search icon"></i>
         </div>
       </div>
@@ -16,12 +16,12 @@
       <i class="check icon"></i> {{ toastMessage }}
     </div>
 
-    <div v-if="loading">Đang tải...</div>
+    <div v-if="loading">Loading...</div>
 
     <div v-else-if="filteredTickets.length === 0">
-      <p>Không tìm thấy dữ liệu phù hợp.</p>
+      <p>No matching data found.</p>
       <router-link to="/tickets/new" class="ui button positive">
-        Tạo ticket mới
+        Create New Ticket         
       </router-link>
     </div>
 
@@ -42,11 +42,17 @@
 
           <td class="center aligned">
             <div class="ui label" :class="getPriorityColor(t.priority)">
-              {{ t.priority || 'Chưa xếp loại' }}
+              {{ t.priority || 'Not prioritized' }}
             </div>
           </td>
 
           <td>{{ t.value }}</td>
+          
+          <td width="75" class="center aligned">
+            <button class="ui mini teal button" @click="copyResponse(t.value)">
+              Copy
+            </button>
+          </td>
 
           <td width="50" class="center aligned">
             <router-link :to="{ name: 'show', params: { id: t._id } }" class="ui mini button">
@@ -78,18 +84,17 @@ export default {
     return {
       tickets: [],
       loading: true,
-      searchQuery: '', // Biến lưu trữ từ khóa tìm kiếm
-      toastMessage: '' // Biến lưu trữ thông báo khi copy
+      searchQuery: '', 
+      toastMessage: '' 
     };
   },
   computed: {
-    // XỬ LÝ LỌC DỮ LIỆU (REAL-TIME FILTER)
+    
     filteredTickets() {
       if (!this.searchQuery) return this.tickets;
 
       const lowerCaseQuery = this.searchQuery.toLowerCase();
       return this.tickets.filter(t => {
-        // Lọc qua nhiều trường để tìm kiếm thông minh hơn
         return (
           (t.key && t.key.toLowerCase().includes(lowerCaseQuery)) ||
           (t.category && t.category.toLowerCase().includes(lowerCaseQuery)) ||
@@ -106,11 +111,10 @@ export default {
     this.loading = false;
   },
   methods: {
-    // HÀM ĐỔI MÀU BẢNG (Sử dụng class màu mặc định của Semantic UI)
+    
     getPriorityColor(priority) {
       if (!priority) return '';
 
-      // Chuyển về chữ thường và cắt bỏ khoảng trắng 2 đầu để so sánh chính xác 100%
       const p = priority.toString().trim().toLowerCase();
 
       // Bảng màu chuẩn của Semantic UI Label
@@ -119,19 +123,17 @@ export default {
       if (p === 'medium' || p === 'trung bình') return 'blue';
       if (p === 'low' || p === 'thấp') return 'green';
 
-      return 'grey'; // Màu mặc định nếu không khớp từ khóa nào
+      return 'grey'; 
     },
 
-    // HÀM XỬ LÝ COPY VÀ HIỂN THỊ TOAST
     async copyResponse(text) {
       if (!text) return;
       try {
         await navigator.clipboard.writeText(text);
 
-        // Hiện thông báo
         this.toastMessage = 'Đã sao chép câu trả lời vào bộ nhớ tạm!';
 
-        // Tự động tắt thông báo sau 2.5 giây
+        
         setTimeout(() => {
           this.toastMessage = '';
         }, 2500);
