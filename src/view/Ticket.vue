@@ -48,6 +48,12 @@
 
           <td>{{ t.value }}</td>
 
+          <td width="75" class="center aligned">
+            <button class="ui mini teal button" @click="copyResponse(t.value)">
+              Copy
+            </button>
+          </td>
+
           <td width="50" class="center aligned">
             <router-link :to="{ name: 'show', params: { id: t._id } }" class="ui mini button">
               Show
